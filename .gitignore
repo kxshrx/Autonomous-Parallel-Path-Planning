@@ -5,7 +5,7 @@ Thumbs.db
 *.swo
 .idea/
 .vscode/
-*.log
+# *.log
 
 # --- Python (Backend) ---
 backend/__pycache__/
