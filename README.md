@@ -1,8 +1,3 @@
-<img src="https://r2cdn.perplexity.ai/pplx-full-logo-primary-dark%402x.png" class="logo" width="120"/>
-
-# koay now we are dont with this porject you have to write me a readme file, for this project am a colege student though
-
-Looking at your project files, I'll create a comprehensive README file for your Autonomous Parallel Path Planning System project. Here's a professional README suitable for a college student project:
 
 ```markdown
 # Autonomous Parallel Path Planning System
