@@ -4,28 +4,42 @@ import networkx as nx
 import osmnx as ox
 import math
 import time
-import signal
 from datetime import datetime
 from threading import Lock
 from functools import lru_cache, wraps
 from concurrent.futures import ThreadPoolExecutor, as_completed, TimeoutError
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, jsonify, request
 from geopy.geocoders import Nominatim
 from flask_cors import CORS
 
-# Enhanced logging setup
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s',
-    handlers=[
-        logging.FileHandler('logs/app_detailed.log'),
-        logging.StreamHandler()
-    ]
-)
+# Create necessary directories
+os.makedirs('logs', exist_ok=True)
+os.makedirs('cache', exist_ok=True)
+
+# Production-safe logging setup
+if os.environ.get('FLASK_ENV') == 'production' or os.environ.get('PORT'):
+    # Production: console logging only
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[logging.StreamHandler()]
+    )
+else:
+    # Development: file + console logging
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s',
+        handlers=[
+            logging.FileHandler('logs/app_detailed.log'),
+            logging.StreamHandler()
+        ]
+    )
+
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:3000"])
+# CORS configuration
+CORS(app, origins=["*"])
 
 # Global variables
 graph_lock = Lock()
@@ -35,14 +49,8 @@ current_paths = {}
 current_start_end = None
 
 # Timeout settings
-ALGORITHM_TIMEOUT = 10  # 10 seconds max per algorithm
-REQUEST_TIMEOUT = 30    # 30 seconds max per request
-
-# Cache directory
-if not os.path.exists('cache'):
-    os.makedirs('cache')
-if not os.path.exists('logs'):
-    os.makedirs('logs')
+ALGORITHM_TIMEOUT = 10
+REQUEST_TIMEOUT = 30
 
 # Load or create graph using GraphML
 cache_file = 'cache/graph.graphml'
@@ -173,12 +181,11 @@ def calculate_path_metrics(G, path):
 
 @timeout_handler
 def fast_parallel_dijkstra(G, start_node, end_node, num_threads=4):
-    """Fixed parallel Dijkstra using NetworkX with parallel edge processing"""
+    """Fixed parallel Dijkstra using NetworkX"""
     logger.info(f"Starting fast parallel Dijkstra with {num_threads} threads")
     start_time = time.time()
     
     try:
-        # Use NetworkX optimized Dijkstra with parallel preprocessing
         path = nx.dijkstra_path(G, start_node, end_node, weight='length')
         end_time = time.time()
         logger.info(f"Fast parallel Dijkstra completed in {end_time - start_time:.4f}s")
@@ -192,12 +199,11 @@ def fast_parallel_dijkstra(G, start_node, end_node, num_threads=4):
 
 @timeout_handler
 def fast_parallel_astar(G, start_node, end_node, num_threads=4):
-    """Fixed parallel A* using NetworkX with optimizations"""
+    """Fixed parallel A* using NetworkX"""
     logger.info(f"Starting fast parallel A* with {num_threads} threads")
     start_time = time.time()
     
     try:
-        # Use NetworkX optimized A* 
         path = nx.astar_path(G, start_node, end_node, heuristic=euclidean_heuristic, weight='length')
         end_time = time.time()
         logger.info(f"Fast parallel A* completed in {end_time - start_time:.4f}s")
@@ -216,7 +222,6 @@ def fast_parallel_bellman_ford(G, start_node, end_node, num_threads=4):
     start_time = time.time()
     
     try:
-        # Use NetworkX optimized Bellman-Ford
         path = nx.bellman_ford_path(G, start_node, end_node, weight='length')
         end_time = time.time()
         logger.info(f"Fast parallel Bellman-Ford completed in {end_time - start_time:.4f}s")
@@ -279,7 +284,6 @@ def recalculate_paths_with_obstacles():
         
         paths = {}
         
-        # Calculate paths with timeout protection
         algorithms = [
             ('parallel_dijkstra', fast_parallel_dijkstra),
             ('parallel_astar', fast_parallel_astar),
@@ -321,7 +325,7 @@ def recalculate_paths_with_obstacles():
 @app.route('/')
 def index():
     return jsonify({
-        "status": "Chennai PathFinder API",
+        "status": "Autonomous Parallel Path Planning System API",
         "version": "1.0",
         "endpoints": ["/geocode", "/find_path", "/add_obstacle", "/clear_obstacles"],
         "algorithms": ["parallel_dijkstra", "parallel_astar", "parallel_bellman_ford", "sequential_dijkstra", "sequential_astar"]
@@ -357,10 +361,8 @@ def add_obstacle():
         obstacles.append(obstacle)
         logger.info(f"Added obstacle at {obstacle}")
         
-        # Remove edges near the new obstacle
         graph_modified = remove_edges_near_obstacle(G, obstacle)
         
-        # Automatically recalculate paths if they exist and graph was modified
         updated_paths = None
         if graph_modified and current_start_end:
             updated_paths = recalculate_paths_with_obstacles()
@@ -385,7 +387,6 @@ def clear_obstacles():
         G = original_graph.copy()
         logger.info("Cleared all obstacles and reset graph")
         
-        # Automatically recalculate paths if they exist
         updated_paths = None
         if current_start_end:
             updated_paths = recalculate_paths_with_obstacles()
@@ -413,7 +414,6 @@ def find_path():
         
         current_start_end = (start, end)
         
-        # Calculate paths using optimized algorithms
         paths = recalculate_paths_with_obstacles()
         
         if isinstance(paths, dict) and 'error' in paths:
@@ -427,4 +427,5 @@ def find_path():
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 9000))
-    app.run(debug=False, host='0.0.0.0', port=port)
+    debug = os.environ.get('FLASK_ENV') != 'production'
+    app.run(debug=debug, host='0.0.0.0', port=port)
