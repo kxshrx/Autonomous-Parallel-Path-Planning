@@ -128,7 +128,7 @@ Manual testing scenarios:
 
 ---
 
-## 👨‍🎓 Author
+## Author
 
 **[kxshrx]**  
 
