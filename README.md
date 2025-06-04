@@ -101,7 +101,7 @@ The backend will run on [http://localhost:9000](http://localhost:9000)
 cd frontend
 npm install
 npm run build
-npm run start
+npm run dev
 ```
 The frontend will run on [http://localhost:3000](http://localhost:3000)
 
