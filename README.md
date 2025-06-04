@@ -73,7 +73,7 @@ README.md
 ### 1. Clone the Repository
 
 ```sh
-git clone <repository-url>
+git clone https://github.com/kxshrx/Autonomous-Parallel-Path-Planning.git
 cd Autonomous-Parallel-Path-Planning
 ```
 
@@ -82,12 +82,15 @@ cd Autonomous-Parallel-Path-Planning
 ```sh
 cd backend
 python3 -m venv venv
+
 # Activate virtual environment:
 # On macOS/Linux:
 source venv/bin/activate
 # On Windows:
 venv\Scripts\activate
+
 pip install -r requirements.txt
+
 python app.py
 ```
 The backend will run on [http://localhost:9000](http://localhost:9000)
@@ -97,7 +100,8 @@ The backend will run on [http://localhost:9000](http://localhost:9000)
 ```sh
 cd frontend
 npm install
-npm run dev
+npm run build
+npm run start
 ```
 The frontend will run on [http://localhost:3000](http://localhost:3000)
 
