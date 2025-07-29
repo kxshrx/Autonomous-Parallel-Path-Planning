@@ -1,6 +1,6 @@
 # Autonomous Parallel Path Planning System
 
-[![Watch the demo video](autonomous_path_planning_img.png)](https://drive.google.com/file/d/1Ps0vhziXUjiXYU3fBNmfE7LxJdRh2S1z/view?usp=sharing)
+[![Watch the demo video](autonomous_path_planning_img.png)](https://drive.google.com/file/d/1Od502U7hioEg0EuqtHVO36FZ5RfKd1Je/view?usp=sharing)
 
 > Click the image to view the demo video
 
