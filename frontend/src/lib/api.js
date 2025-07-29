@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const API_BASE = process.env.NODE_ENV === 'production' 
   ? process.env.NEXT_PUBLIC_API_URL || 'https://your-backend-name.onrender.com'
-  : 'http://localhost:9000';
+  : 'http://localhost:8000';
 
 const api = axios.create({
   baseURL: API_BASE,
