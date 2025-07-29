@@ -6,7 +6,7 @@
 2. [System Architecture](#system-architecture)
 3. [Algorithms & Implementation](#algorithms--imp### Backend Technologies
 
-1. **Core Framework**
+4. **Core Framework**
 
    - **FastAPI**: Modern, high-performance Python web framework
    - **Uvicorn**: Lightning-fast ASGI server
@@ -15,24 +15,24 @@
    - **Geopy**: Geocoding services integration
    - **Pydantic**: Data validation and settings management
 
-2. **Services**
+5. **Services**
 
    - **CORS**: Cross-Origin Resource Sharing support
    - **JSON**: Data interchange format
 
-3. **Data Sources**
+6. **Data Sources**
    - **OpenStreetMap**: Road network data
    - **Geopy Nominatim**: Geocoding servicehnology Stack](#technology-stack)
-5. [Implementation Details](#implementation-details)
-6. [Frontend Components](#frontend-components)
-7. [Backend Services](#backend-services)
-8. [Data Flow & System Integration](#data-flow--system-integration)
-9. [Performance Analysis](#performance-analysis)
-10. [Deployment & Configuration](#deployment--configuration)
-11. [Testing & Validation](#testing--validation)
-12. [Future Enhancements](#future-enhancements)
-13. [Conclusion](#conclusion)
-14. [References](#references)
+7. [Implementation Details](#implementation-details)
+8. [Frontend Components](#frontend-components)
+9. [Backend Services](#backend-services)
+10. [Data Flow & System Integration](#data-flow--system-integration)
+11. [Performance Analysis](#performance-analysis)
+12. [Deployment & Configuration](#deployment--configuration)
+13. [Testing & Validation](#testing--validation)
+14. [Future Enhancements](#future-enhancements)
+15. [Conclusion](#conclusion)
+16. [References](#references)
 
 ---
 
@@ -57,6 +57,7 @@ The backend has been significantly modernized and optimized:
 
 1. **Framework Migration**: Migrated from Flask to FastAPI for better performance and automatic API documentation
 2. **Dependency Optimization**: Streamlined dependencies to only include actively used packages:
+
    - **FastAPI**: High-performance web framework
    - **Uvicorn**: Lightning-fast ASGI server
    - **NetworkX**: Graph analysis and manipulation
@@ -65,11 +66,13 @@ The backend has been significantly modernized and optimized:
    - **Pydantic**: Data validation and settings management
 
 3. **Performance Improvements**:
+
    - Removed logging overhead for production deployment
    - Optimized memory usage by removing unused dependencies
    - Simplified codebase for better maintainability
 
 4. **Development Optimization**:
+
    - Cleaner, more focused codebase
    - Reduced package footprint
    - Better error handling with FastAPI's automatic validation
