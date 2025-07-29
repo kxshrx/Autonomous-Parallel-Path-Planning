@@ -1,6 +1,6 @@
 # Autonomous Parallel Path Planning System
 
-[![Watch the demo video](autonomous_path_planning_img.png)](https://github.com/kxshrx/Autonomous-Parallel-Path-Planning/releases/download/v1.0/autonomous_path_planning.mp4)
+[![Watch the demo video](autonomous_path_planning_img.png)](https://drive.google.com/uc?export=preview&id=1efSh0NH_u_YWkeJsPqvnnmGkY-6abKcj)
 
 > Click the image to view the demo video
 
