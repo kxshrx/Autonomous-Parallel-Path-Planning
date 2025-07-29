@@ -4,8 +4,25 @@
 
 1. [Introduction](#introduction)
 2. [System Architecture](#system-architecture)
-3. [Algorithms & Implementation](#algorithms--implementation)
-4. [Technology Stack](#technology-stack)
+3. [Algorithms & Implementation](#algorithms--imp### Backend Technologies
+
+1. **Core Framework**
+
+   - **FastAPI**: Modern, high-performance Python web framework
+   - **Uvicorn**: Lightning-fast ASGI server
+   - **NetworkX**: Graph manipulation and analysis
+   - **OSMnx**: OpenStreetMap network analysis
+   - **Geopy**: Geocoding services integration
+   - **Pydantic**: Data validation and settings management
+
+2. **Services**
+
+   - **CORS**: Cross-Origin Resource Sharing support
+   - **JSON**: Data interchange format
+
+3. **Data Sources**
+   - **OpenStreetMap**: Road network data
+   - **Geopy Nominatim**: Geocoding servicehnology Stack](#technology-stack)
 5. [Implementation Details](#implementation-details)
 6. [Frontend Components](#frontend-components)
 7. [Backend Services](#backend-services)
@@ -32,6 +49,36 @@ The primary goal of this project is to provide a comprehensive framework for:
 
 This documentation provides an in-depth look at the system architecture, implementation details, and technical insights into the development process.
 
+## Recent Updates (v2.0)
+
+### Backend Modernization
+
+The backend has been significantly modernized and optimized:
+
+1. **Framework Migration**: Migrated from Flask to FastAPI for better performance and automatic API documentation
+2. **Dependency Optimization**: Streamlined dependencies to only include actively used packages:
+   - **FastAPI**: High-performance web framework
+   - **Uvicorn**: Lightning-fast ASGI server
+   - **NetworkX**: Graph analysis and manipulation
+   - **OSMnx**: OpenStreetMap network processing
+   - **Geopy**: Geocoding services
+   - **Pydantic**: Data validation and settings management
+
+3. **Performance Improvements**:
+   - Removed logging overhead for production deployment
+   - Optimized memory usage by removing unused dependencies
+   - Simplified codebase for better maintainability
+
+4. **Development Optimization**:
+   - Cleaner, more focused codebase
+   - Reduced package footprint
+   - Better error handling with FastAPI's automatic validation
+
+5. **Repository Management**:
+   - Chennai road network graph (`graph.graphml`) is now cached and version-controlled
+   - Faster startup times with pre-cached geographic data
+   - Reduced initial download requirements
+
 ---
 
 ## System Architecture
@@ -45,7 +92,7 @@ The project follows a modern client-server architecture with clear separation of
 │         FRONTEND             │      │          BACKEND              │
 │  ┌─────────────────────────┐ │      │  ┌─────────────────────────┐  │
 │  │                         │ │      │  │                         │  │
-│  │       Next.js App       │ │      │  │      Flask Server       │  │
+│  │       Next.js App       │ │      │  │     FastAPI Server      │  │
 │  │                         │ │◄─────┼──┤                         │  │
 │  └─────────────────────────┘ │  API │  └─────────────────────────┘  │
 │             │                │ Calls │              │                │
@@ -101,7 +148,7 @@ The backend implements a service-oriented architecture with the following compon
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                       FLASK APPLICATION                             │
+│                      FASTAPI APPLICATION                            │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
 │         ┌───────────────────────────────────────────────┐           │
@@ -130,9 +177,6 @@ The backend implements a service-oriented architecture with the following compon
 │         │   └────────────┘   │ │ └───────────┘ ││                ││
 │         │   ┌────────────┐   │ │ ┌───────────┐ ││                ││
 │         │   │     A*     │   │ │ │    A*     │ ││                ││
-│         │   └────────────┘   │ │ └───────────┘ ││                ││
-│         │   ┌────────────┐   │ │ ┌───────────┐ ││                ││
-│         │   │Bellman-Ford│   │ │ │Bellman-Ford│ ││                ││
 │         │   └────────────┘   │ │ └───────────┘ ││                ││
 │         └────────────────────┘ └───────────────┘│                ││
 │                                                 │                ││
@@ -402,26 +446,26 @@ The UI implements multiple theming options:
 
    - Purpose: Convert text addresses to coordinates
    - Payload: `{ "location": "address string" }`
-   - Response: `{ "lat": float, "lng": float, "display_name": string }`
-   - Error Handling: 404 for not found, 400 for invalid input
+   - Response: `{ "lat": float, "lng": float }`
+   - Error Handling: 500 for geocoding errors, 400 for invalid input
 
 2. **`/find_path` (POST)**
 
    - Purpose: Calculate paths between points using all algorithms
-   - Payload: `{ "start": [lat, lng], "end": [lat, lng] }`
-   - Response: Dictionary of algorithm results with paths, distances, and times
+   - Payload: `{ "start": {"lat": float, "lng": float}, "end": {"lat": float, "lng": float} }`
+   - Response: Dictionary of algorithm results with paths, distances, and execution times
    - Performance: Parallel execution of all algorithms
 
 3. **`/add_obstacle` (POST)**
 
    - Purpose: Add temporary road blockage
    - Payload: `{ "lat": float, "lng": float }`
-   - Response: Success status
-   - Effect: Recalculates affected paths
+   - Response: Success status with updated paths
+   - Effect: Recalculates affected paths automatically
 
 4. **`/clear_obstacles` (POST)**
    - Purpose: Remove all obstacles
-   - Response: Success status
+   - Response: Success status with updated paths
    - Effect: Restores original graph state
 
 ### Graph Processing
@@ -430,10 +474,11 @@ The UI implements multiple theming options:
 
    - Source: OpenStreetMap data for Chennai
    - Processing: Extraction of road network as directed graph
-   - Caching: Local storage for performance
+   - Caching: Local storage for performance (`backend/cache/graph.graphml`)
 
-2. **Graph Augmentation**
-   - Speed Limits: Estimation based on road type
+2. **Graph Management**
+   - Dynamic obstacle addition/removal
+   - Thread-safe operations with proper locking mechanisms
    - Travel Times: Calculated from distance and speed
    - Obstacles: Dynamic graph modification
 
@@ -595,9 +640,7 @@ Our comprehensive testing revealed interesting performance dynamics across diffe
      - `NEXT_PUBLIC_API_URL`: Backend API URL
      - `NEXT_PUBLIC_MAP_PROVIDER`: Map tile provider
    - Backend:
-     - `FLASK_ENV`: Development/production mode
-     - `PORT`: Server port (default 9000)
-     - `LOG_LEVEL`: Logging verbosity
+     - `PORT`: Server port (default 8000)
 
 ### Production Deployment
 
@@ -610,9 +653,10 @@ Our comprehensive testing revealed interesting performance dynamics across diffe
 
 2. **Backend Deployment**
 
-   - Platform: Render/Heroku
-   - Deployment method: Docker container
-   - Requirements: `requirements.txt`
+   - Platform: Railway/Render/Heroku
+   - Runtime: Python 3.9+
+   - Web server: Uvicorn
+   - Dependencies: `requirements.txt`
    - Configuration: Environment variables, CORS settings
 
 3. **Performance Optimization**

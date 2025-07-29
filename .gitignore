@@ -21,8 +21,8 @@ backend/.mypy_cache/
 backend/.coverage
 backend/coverage.*
 backend/.cache/
-backend/cache/
-backend/logs/
+backend/cache/*
+!backend/cache/graph.graphml
 backend/*.sqlite3
 
 # --- Node/Next.js (Frontend) ---

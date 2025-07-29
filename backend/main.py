@@ -1,5 +1,4 @@
 import os
-import logging
 import networkx as nx
 import osmnx as ox
 import math
@@ -27,27 +26,7 @@ class ObstacleRequest(BaseModel):
     lat: float
     lng: float
 
-os.makedirs('logs', exist_ok=True)
 os.makedirs('cache', exist_ok=True)
-
-# Setup logging
-if os.environ.get('FLASK_ENV') == 'production' or os.environ.get('PORT'):
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        handlers=[logging.StreamHandler()]
-    )
-else:
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s',
-        handlers=[
-            logging.FileHandler('logs/app_detailed.log'),
-            logging.StreamHandler()
-        ]
-    )
-
-logger = logging.getLogger(__name__)
 app = FastAPI()
 
 app.add_middleware(
@@ -73,22 +52,17 @@ num_workers = max(6, cpu_count())
 cache_file = 'cache/graph.graphml'
 try:
     if os.path.exists(cache_file):
-        logger.info("Loading graph from cache...")
         start_time = time.time()
         city_map = ox.load_graphml(cache_file)
         load_time = time.time() - start_time
-        logger.info(f"Graph loaded in {load_time:.2f}s - Nodes: {len(city_map.nodes)}, Edges: {len(city_map.edges)}")
         backup_map = city_map.copy()
     else:
-        logger.info("Downloading Chennai map...")
         start_time = time.time()
         city_map = ox.graph_from_place("Chennai, Tamil Nadu, India", network_type="drive", simplify=True)
         download_time = time.time() - start_time
-        logger.info(f"Graph downloaded in {download_time:.2f}s")
         ox.save_graphml(city_map, cache_file)
         backup_map = city_map.copy()
 except Exception as e:
-    logger.error(f"FATAL: Could not load map: {str(e)}")
     raise
 
 # Store coordinates for faster calculations
@@ -102,7 +76,6 @@ def add_timeout(func):
             try:
                 return future.result(timeout=timeout_seconds)
             except TimeoutError:
-                logger.warning(f"{func.__name__} took too long")
                 return None
     return wrapper
 
@@ -115,12 +88,10 @@ def find_location(place_name):
         
         if location:
             result = {"lat": location.latitude, "lng": location.longitude}
-            logger.info(f"Found location: {result}")
             return result
         else:
             raise ValueError("Location not found")
     except Exception as e:
-        logger.error(f"Location error for '{place_name}': {str(e)}")
         raise
 
 def calculate_straight_distance(point1, point2):
@@ -161,7 +132,6 @@ class SafeQueue:
 
 @add_timeout
 def find_shortest_path_parallel(graph, start, end):
-    logger.info(f"Starting parallel shortest path with {num_workers} workers")
     start_time = time.time()
     
     try:
@@ -265,16 +235,13 @@ def find_shortest_path_parallel(graph, start, end):
             return None
         
         end_time = time.time()
-        logger.info(f"Parallel shortest path done in {end_time - start_time:.4f}s")
         return path
         
     except Exception as e:
-        logger.error(f"Error in parallel shortest path: {str(e)}")
         return None
 
 @add_timeout
 def find_smart_path_parallel(graph, start, end):
-    logger.info(f"Starting parallel smart path with {num_workers} workers")
     start_time = time.time()
     
     try:
@@ -386,16 +353,13 @@ def find_smart_path_parallel(graph, start, end):
             return None
         
         end_time = time.time()
-        logger.info(f"Parallel smart path done in {end_time - start_time:.4f}s")
         return path
         
     except Exception as e:
-        logger.error(f"Error in parallel smart path: {str(e)}")
         return None
 
 @add_timeout
 def find_shortest_path_simple(graph, start, end):
-    logger.info("Starting simple shortest path")
     start_time = time.time()
     try:
         path = nx.dijkstra_path(graph, start, end, weight='length')
@@ -405,15 +369,12 @@ def find_shortest_path_simple(graph, start, end):
         time.sleep(processing_time)
         
         end_time = time.time()
-        logger.info(f"Simple shortest path done in {end_time - start_time:.4f}s")
         return path
     except nx.NetworkXNoPath:
-        logger.warning("No path found in simple shortest path")
         return None
 
 @add_timeout
 def find_smart_path_simple(graph, start, end):
-    logger.info("Starting simple smart path")
     start_time = time.time()
     try:
         path = nx.astar_path(graph, start, end, heuristic=calculate_straight_distance, weight='length')
@@ -423,10 +384,8 @@ def find_smart_path_simple(graph, start, end):
         time.sleep(processing_time)
         
         end_time = time.time()
-        logger.info(f"Simple smart path done in {end_time - start_time:.4f}s")
         return path
     except nx.NetworkXNoPath:
-        logger.warning("No path found in simple smart path")
         return None
 
 def block_roads_near_obstacle(graph, obstacle_location, radius=0.002):
@@ -441,7 +400,6 @@ def block_roads_near_obstacle(graph, obstacle_location, radius=0.002):
             roads_to_block.append((u, v))
     
     if roads_to_block:
-        logger.info(f"Blocking {len(roads_to_block)} roads near obstacle at ({lat:.4f}, {lng:.4f})")
         graph.remove_edges_from(roads_to_block)
         return True
     return False
@@ -497,10 +455,8 @@ def update_all_paths():
         start_node = ox.nearest_nodes(city_map, start['lng'], start['lat'])
         end_node = ox.nearest_nodes(city_map, end['lng'], end['lat'])
         
-        logger.info(f"Updating paths from {start_node} to {end_node}")
         
         if not nx.has_path(city_map, start_node, end_node):
-            logger.warning("No path exists after adding obstacles")
             return {'error': 'No path exists between these points after adding obstacles.'}
         
         paths = {}
@@ -527,21 +483,16 @@ def update_all_paths():
                         'distance': trip_info['distance'],
                         'travel_time': trip_info['travel_time']
                     }
-                    logger.info(f"{algo_name}: {end_time - start_time:.4f}s, {len(path)} nodes")
                 else:
                     paths[algo_name] = {'error': 'No path found or timeout'}
-                    logger.warning(f"{algo_name}: No path found or timeout")
                     
             except Exception as e:
-                logger.error(f"{algo_name} error: {str(e)}")
                 paths[algo_name] = {'error': str(e)}
         
         saved_routes = paths
-        logger.info("Successfully updated all paths")
         return paths
         
     except Exception as e:
-        logger.error(f"Error updating paths: {str(e)}")
         return {'error': str(e)}
 
 # API endpoints
@@ -564,7 +515,6 @@ def geocode_place(request: LocationRequest):
         result = find_location(request.location)
         return result
     except Exception as e:
-        logger.error(f"Geocoding error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post('/add_obstacle')
@@ -575,14 +525,12 @@ def place_obstacle(request: ObstacleRequest):
         
         obstacle = (request.lat, request.lng)
         blocked_roads.append(obstacle)
-        logger.info(f"Added obstacle at {obstacle}")
         
         roads_modified = block_roads_near_obstacle(city_map, obstacle)
         updated_paths = None
         
         if roads_modified and route_points:
             updated_paths = update_all_paths()
-            logger.info("Updated paths due to obstacle")
         
         return {
             'success': True,
@@ -591,7 +539,6 @@ def place_obstacle(request: ObstacleRequest):
             'updated_paths': updated_paths
         }
     except Exception as e:
-        logger.error(f"Error adding obstacle: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post('/clear_obstacles')
@@ -600,19 +547,16 @@ def clear_obstacles():
         global city_map
         blocked_roads.clear()
         city_map = backup_map.copy()
-        logger.info("Cleared all obstacles and reset map")
         
         updated_paths = None
         if route_points:
             updated_paths = update_all_paths()
-            logger.info("Updated paths after clearing obstacles")
         
         return {
             'success': True,
             'updated_paths': updated_paths
         }
     except Exception as e:
-        logger.error(f"Error clearing obstacles: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post('/find_path')
@@ -633,7 +577,6 @@ def find_route(request: PathRequest):
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error finding path: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == '__main__':
