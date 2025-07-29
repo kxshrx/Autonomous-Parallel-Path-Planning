@@ -6,15 +6,36 @@ A modern web application demonstrating advanced parallel pathfinding algorithms 
 
 ## 🎯 Project Overview
 
-This system implements and compares 5 different pathfinding algorithms:
+This system implements and compares 4 different pathfinding algorithms:
 
 - **Parallel Dijkstra** – Multi-threaded shortest path algorithm
-- **Parallel A\*** – Heuristic-based parallel pathfinding
-- **Parallel Bellman-Ford** – Parallel edge relaxation algorithm
+- **Parallel A*** – Heuristic-based parallel pathfinding
 - **Sequential Dijkstra** – Traditional shortest path algorithm
-- **Sequential A\*** – Traditional heuristic pathfinding
+- **Sequential A*** – Traditional heuristic pathfinding
 
 The application uses Chennai's road network as a test environment to demonstrate real-world performance differences between parallel and sequential algorithm implementations.
+
+---
+
+## 🚀 Quick Start
+
+```bash
+# Clone repository
+git clone https://github.com/kxshrx/Autonomous-Parallel-Path-Planning.git
+cd Autonomous-Parallel-Path-Planning
+
+# Setup backend (FastAPI)
+cd backend
+python3 -m venv venv && source venv/bin/activate  # Linux/Mac
+pip install -r requirements.txt
+python main.py  # Runs on http://localhost:8000
+
+# Setup frontend (Next.js) - in new terminal
+cd frontend
+npm install && npm run dev  # Runs on http://localhost:3000
+```
+
+> **Note:** The Chennai road network is pre-cached in the repository, so no initial download is required!
 
 ---
 
@@ -27,11 +48,12 @@ The application uses Chennai's road network as a test environment to demonstrate
 - **Map Integration:** React-Leaflet with OpenStreetMap
 - **UI Components:** Custom reusable components
 
-### Backend (Flask)
-- **Framework:** Flask (Python)
+### Backend (FastAPI)
+- **Framework:** FastAPI with Uvicorn server
 - **Graph Processing:** NetworkX and OSMnx for road network analysis
 - **Geocoding:** Geopy
-- **Parallelism:** Python threading/multiprocessing
+- **Parallelism:** Python threading for concurrent pathfinding
+- **Data Validation:** Pydantic for request/response models
 
 ---
 
@@ -39,10 +61,10 @@ The application uses Chennai's road network as a test environment to demonstrate
 
 ```
 backend/
-  app.py
-  requirements.txt
+  main.py              # FastAPI application
+  requirements.txt     # Python dependencies (6 packages)
   cache/
-  logs/
+    graph.graphml      # Pre-cached Chennai road network
 frontend/
   src/
     app/
@@ -54,21 +76,29 @@ frontend/
   next.config.mjs
   ...
 README.md
+documentation.md       # Detailed technical documentation
 ```
 
 ---
 
 ## 🚀 Features
 
-- Interactive map for selecting start and end locations
-- Real-time route calculation using multiple algorithms
-- Performance comparison between parallel and sequential approaches
-- Travel time and distance estimation
-- Modern, responsive UI
+- **🗺️ Interactive Map**: Click-to-select start and end locations on Chennai's road network
+- **⚡ Parallel Processing**: Compare 4 different pathfinding algorithms (2 parallel, 2 sequential)
+- **📊 Real-time Performance**: Live comparison of execution times and algorithm efficiency
+- **🚧 Dynamic Obstacles**: Add/remove road obstacles to test algorithm adaptability
+- **📈 Travel Analytics**: Distance estimation and travel time calculations
+- **🎨 Modern UI**: Clean, responsive interface with real-time updates
+- **🔄 Auto-recalculation**: Paths automatically update when obstacles are modified
 
 ---
 
 ## 🛠️ Installation & Setup
+
+### Prerequisites
+- **Python 3.9+** 
+- **Node.js 18+**
+- **Git**
 
 ### 1. Clone the Repository
 
@@ -91,9 +121,9 @@ venv\Scripts\activate
 
 pip install -r requirements.txt
 
-python app.py
+python main.py
 ```
-The backend will run on [http://localhost:9000](http://localhost:9000)
+The backend will run on [http://localhost:8000](http://localhost:8000)
 
 ### 3. Frontend Setup
 
@@ -110,25 +140,48 @@ The frontend will run on [http://localhost:3000](http://localhost:3000)
 ## ⚙️ Configuration
 
 ### Backend
-- **Port:** 9000 (configurable in `app.py`)
-- **CORS:** Enabled for `http://localhost:3000`
-- **Graph Cache:** Chennai road network cached locally
-- **Logging:** Detailed logs in `logs/` directory
+- **Port:** 8000 (configurable via PORT environment variable)
+- **CORS:** Enabled for all origins (development setup)
+- **Graph Cache:** Chennai road network pre-cached in repository
+- **Dependencies:** Streamlined to 6 essential packages only
 
 ### Frontend
-- **API Base URL:** `http://localhost:9000` (configured in [`src/lib/api.js`](frontend/src/lib/api.js))
+- **API Base URL:** `http://localhost:8000` (configured in [`src/lib/api.js`](frontend/src/lib/api.js))
 - **Map Provider:** CartoDB Voyager tiles
 - **Default Location:** Chennai, Tamil Nadu (13.0827°N, 80.2707°E)
 
 ---
 
-## 🧪 Testing
+## 🧪 Testing & Usage
 
-Manual testing scenarios:
-- Start both backend and frontend servers
-- Select start and end points on the map
-- Compare results for different algorithms
-- Observe travel time, distance, and algorithm performance
+### Manual Testing Scenarios:
+1. **Start both servers** (backend on :8000, frontend on :3000)
+2. **Select locations** by clicking on the Chennai map
+3. **Compare algorithms** - observe parallel vs sequential performance
+4. **Add obstacles** - click anywhere to add road blocks
+5. **Analyze results** - review travel time, distance, and execution speed
+
+### API Endpoints:
+- `POST /geocode` - Convert address to coordinates
+- `POST /find_path` - Calculate routes using all algorithms
+- `POST /add_obstacle` - Add road blockage
+- `POST /clear_obstacles` - Remove all obstacles
+- `GET /` - API status and documentation
+
+---
+
+## 📈 Performance Highlights
+
+- **Parallel algorithms** show significant improvements for complex routes
+- **Pre-cached graph** eliminates ~30-second initial download time
+- **Concurrent processing** of multiple algorithms for real-time comparison
+- **Memory-optimized** implementation with streamlined dependencies
+
+---
+
+## 📚 Documentation
+
+For detailed technical documentation, algorithm analysis, and architecture details, see [`documentation.md`](documentation.md).
 
 ---
 
@@ -140,3 +193,11 @@ Manual testing scenarios:
 ---
 
 *This project demonstrates the practical application of parallel computing concepts in solving real-world pathfinding problems, showcasing both theoretical knowledge and practical implementation skills.*
+
+## 🔄 Recent Updates (v2.0)
+
+- **🚀 FastAPI Migration**: Upgraded from Flask to FastAPI for better performance and auto-documentation
+- **📦 Dependency Optimization**: Reduced from 11 to 6 essential packages
+- **🗄️ Pre-cached Data**: Chennai road network now included in repository (49MB)
+- **⚡ Performance Boost**: Removed logging overhead for production deployment
+- **🧹 Code Cleanup**: Streamlined codebase focused on core pathfinding functionality
