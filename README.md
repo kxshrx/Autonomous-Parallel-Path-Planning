@@ -35,17 +35,20 @@ npm run dev  # Runs at http://localhost:3000
 ## 🏗️ Architecture
 
 ### Frontend (Next.js)
+
 - Next.js 15, React 19, Zustand, React-Leaflet
 - Custom CSS, reusable UI components
 
 ### Backend (FastAPI)
+
 - FastAPI, Uvicorn, NetworkX, OSMnx, Geopy, Pydantic
 - Pre-cached Chennai road network for instant startup
 
 ---
 
 ## 📖 Project Overview
-- Visualizes and compares parallel vs sequential pathfinding (Dijkstra, A*)
+
+- Visualizes and compares parallel vs sequential pathfinding (Dijkstra, A\*)
 - Interactive map for route selection and obstacle placement
 - Real-time travel time, distance, and performance metrics
 - Designed for autonomous navigation research and education
@@ -53,6 +56,7 @@ npm run dev  # Runs at http://localhost:3000
 ---
 
 ## 📁 Project Structure
+
 ```
 backend/
   main.py              # FastAPI backend
@@ -74,5 +78,6 @@ README.md
 ---
 
 ## 📚 Documentation
+
 - For API endpoints, architecture, and algorithm details: see [`documentation.md`](documentation.md)
 - [View on GitHub](https://github.com/kxshrx/Autonomous-Parallel-Path-Planning)
