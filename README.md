@@ -1,9 +1,8 @@
 # Autonomous Parallel Path Planning System
 
-<video src="autonomous_path_planning.mp4" controls width="100%" poster="autonomous_path_planning_img.png">
-  Your browser does not support the video tag. 
-  [Download the demo video](autonomous_path_planning.mp4)
-</video>
+[![Watch the demo video](autonomous_path_planning_img.png)](https://github.com/kxshrx/Autonomous-Parallel-Path-Planning/releases/download/v1.0/autonomous_path_planning.mp4)
+
+> Click the image to view the demo video
 
 A modern web app to compare parallel and sequential pathfinding algorithms on Chennai's real road network. Visualize, test, and benchmark different algorithms for autonomous navigation, with instant feedback and dynamic obstacle support.
 
